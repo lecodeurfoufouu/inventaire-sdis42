@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SDIS 42 — Check">
+<meta name="theme-color" content="#8B0E0E">
+<title>SDIS 42 — Check de garde | CIS Séverine</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;600&display=swap');
+
+/* ── RESET & BASE ── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --rouge:#CC2020;--rouge-f:#8B0E0E;
+  --orange:#D97820;--vert:#2A7B35;
+  --bleu:#1458A8;--jaune:#E8A000;--gris:#3C3C3C;
+  --ok:#16A34A;--ok-light:#F0FFF4;--ok-border:#BBF7D0;
+  --bg:#F2F2F2;--card:#FFFFFF;
+  --radius:12px;
+}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Barlow',sans-serif;background:var(--bg);
+  display:flex;flex-direction:column;
+}
+
+/* ── HEADER ── */
+.header{
+  background:var(--rouge-f);color:white;
+  padding:env(safe-area-inset-top,14px) 16px 0;
+  flex-shrink:0;
+  box-shadow:0 2px 10px rgba(0,0,0,0.3);
+}
+.header-top{
+  display:flex;align-items:center;gap:10px;
+  padding-bottom:10px;padding-top:14px;
+}
+.header-logo{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:800;letter-spacing:-0.5px;
+  background:white;color:var(--rouge-f);
+  padding:3px 8px;border-radius:6px;flex-shrink:0;
+  line-height:1
+}
+.header-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:700;letter-spacing:0.5px;
+  line-height:1.2;flex:1
+}
+.header-title small{
+  display:block;font-size:11px;font-weight:400;
+  opacity:0.8;letter-spacing:0px
+}
+
+/* ── PROGRESS ── */
+.progress-wrap{padding:0 0 10px}
+.progress-bar{
+  height:6px;background:rgba(255,255,255,0.25);
+  border-radius:3px;overflow:hidden;margin-bottom:5px
+}
+.progress-fill{
+  height:100%;background:white;border-radius:3px;
+  transition:width 0.35s ease
+}
+.progress-label{
+  font-size:11px;opacity:0.85;
+  display:flex;justify-content:space-between
+}
+.progress-pct{font-weight:700}
+
+/* ── PAGE TABS ── */
+.tabs{
+  display:flex;gap:0;background:rgba(0,0,0,0.2);
+  border-radius:8px 8px 0 0;overflow:hidden;
+  margin-top:2px;
+}
+.tab{
+  flex:1;padding:8px 6px;text-align:center;
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  color:rgba(255,255,255,0.65);cursor:pointer;
+  border:none;background:none;transition:all 0.2s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tab.active{
+  background:var(--bg);color:var(--rouge-f);
+  border-radius:8px 8px 0 0;
+}
+
+/* ── SCROLL CONTENT ── */
+.content{
+  flex:1;overflow-y:auto;padding:12px 12px 100px;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* ── SECTION CARD ── */
+.section-card{
+  background:var(--card);border-radius:var(--radius);
+  margin-bottom:10px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,0.08);
+}
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;cursor:pointer;user-select:none;
+  transition:opacity 0.15s;
+}
+.section-header:active{opacity:0.85}
+.section-left{display:flex;align-items:center;gap:8px}
+.section-icon{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,0.5);flex-shrink:0;
+}
+.section-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:15px;
+  font-weight:700;color:white;letter-spacing:0.4px;text-transform:uppercase
+}
+.section-pill{
+  background:rgba(255,255,255,0.2);color:white;
+  font-size:11px;font-weight:700;padding:2px 9px;
+  border-radius:20px;font-family:'Barlow Condensed',sans-serif;
+  white-space:nowrap
+}
+.section-pill.done{background:rgba(255,255,255,0.4)}
+.chevron{
+  color:rgba(255,255,255,0.6);font-size:12px;
+  transition:transform 0.2s;flex-shrink:0;margin-left:4px
+}
+.section-card.collapsed .chevron{transform:rotate(-90deg)}
+.section-card.done .section-header{opacity:0.7}
+
+/* ── ITEMS ── */
+.items{border-top:1px solid rgba(0,0,0,0.06)}
+.section-card.collapsed .items{display:none}
+.item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;border-bottom:1px solid #F3F3F3;
+  cursor:pointer;transition:background 0.15s;
+  -webkit-user-select:none;user-select:none;
+}
+.item:last-child{border-bottom:none}
+.item:active{background:#F5F5F5}
+.item.checked{background:var(--ok-light)}
+.item.checked .item-name{
+  color:#888;text-decoration:line-through;text-decoration-color:#AAA
+}
+
+.check-box{
+  width:26px;height:26px;flex-shrink:0;
+  border:2px solid #D0D0D0;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;font-size:15px;font-weight:700;
+}
+.item.checked .check-box{
+  background:var(--ok);border-color:var(--ok);color:white;
+}
+.item-name{font-size:15px;flex:1;line-height:1.3;color:#1A1A1A}
+.item-qty{
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;
+  font-weight:700;color:var(--rouge);min-width:22px;text-align:right
+}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:white;border-top:1px solid #E5E5E5;
+  padding:10px 14px env(safe-area-inset-bottom,10px);
+  display:flex;gap:10px;align-items:center;
+  box-shadow:0 -4px 16px rgba(0,0,0,0.08);
+  z-index:100;
+}
+.btn-reset{
+  background:#F0F0F0;color:#555;border:none;
+  border-radius:10px;padding:12px 16px;
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;
+  font-weight:700;cursor:pointer;flex-shrink:0;
+}
+.btn-reset:active{background:#E0E0E0}
+.btn-validate{
+  flex:1;background:var(--ok);color:white;border:none;
+  border-radius:10px;padding:14px;
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;
+  font-weight:800;cursor:pointer;letter-spacing:0.5px;
+  box-shadow:0 2px 8px rgba(22,163,74,0.35);
+}
+.btn-validate:active{background:#15803D}
+
+/* ── MODAL RÉSULTAT ── */
+.result-modal{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.5);z-index:200;
+  align-items:flex-end;
+}
+.result-modal.open{display:flex}
+.result-sheet{
+  background:white;width:100%;
+  border-radius:20px 20px 0 0;
+  padding:28px 24px env(safe-area-inset-bottom,28px);
+  animation:slideUp 0.3s ease;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.result-icon{font-size:60px;text-align:center;margin-bottom:12px}
+.result-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:26px;
+  font-weight:800;text-align:center;margin-bottom:6px
+}
+.result-title.ok{color:var(--ok)}
+.result-title.ko{color:var(--rouge)}
+.result-sub{
+  font-size:13px;color:#666;text-align:center;
+  line-height:1.6;margin-bottom:20px
+}
+.missing-list{
+  background:#FFF5F5;border:1px solid #FFD5D5;border-radius:10px;
+  padding:12px 14px;margin-bottom:16px;max-height:180px;overflow-y:auto
+}
+.missing-list .miss-item{
+  font-size:13px;color:#CC2020;padding:3px 0;
+  border-bottom:1px dotted #FFD5D5;
+}
+.missing-list .miss-item:last-child{border:none}
+.miss-section{font-weight:700;font-size:10px;color:#999;text-transform:uppercase;margin-top:6px}
+.result-time{
+  text-align:center;font-size:11px;color:#AAA;margin-bottom:16px
+}
+.btn-close-result{
+  width:100%;background:var(--rouge-f);color:white;
+  border:none;border-radius:12px;padding:14px;
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;
+  font-weight:800;cursor:pointer;
+}
+.btn-close-result:active{background:var(--rouge)}
+
+/* ── ÉCRAN VIDE ── */
+.empty-state{
+  text-align:center;padding:60px 24px;color:#AAA
+}
+.empty-state .es-icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo">SDIS<span style="color:var(--rouge)">42</span></div>
+    <div class="header-title">
+      Check de garde
+      <small>Sapeurs-Pompiers de la Loire</small>
+    </div>
+    <a href="https://lecodeurfoufouu.github.io/inventaire-sdis42" style="color:white;opacity:0.7;font-size:11px;text-decoration:none;flex-shrink:0;padding:4px 8px;background:rgba(255,255,255,0.15);border-radius:6px">🗺 Affiche</a>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div class="progress-label">
+      <span id="prog-text">0 / 0 articles</span>
+      <span class="progress-pct" id="prog-pct">0%</span>
+    </div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<!-- CONTENU SCROLL -->
+<div class="content" id="content"></div>
+
+<!-- BARRE BAS -->
+<div class="bottom-bar">
+  <button class="btn-reset" onclick="resetCurrent()" title="Réinitialiser">↺ Reset</button>
+  <button class="btn-validate" onclick="validate()">✔ Valider la prise de garde</button>
+</div>
+
+<!-- MODAL RÉSULTAT -->
+<div class="result-modal" id="result-modal" onclick="closeResult(event)">
+  <div class="result-sheet" id="result-sheet">
+    <div class="result-icon" id="r-icon">✅</div>
+    <div class="result-title" id="r-title">Inventaire complet !</div>
+    <div class="result-sub" id="r-sub"></div>
+    <div id="r-missing" style="display:none" class="missing-list"></div>
+    <div class="result-time" id="r-time"></div>
+    <button class="btn-close-result" onclick="closeResult()">← Retour à l'inventaire</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════
+   DONNÉES INVENTAIRE
+══════════════════════════════════ */
+const defaultPages = [
+  {
+    nom: 'FPTL — CIS SÉVERINE',
+    gabarit: [
+      {k:'Long.',v:'6.50 m'},{k:'Larg.',v:'2.50 m'},
+      {k:'Haut.',v:'3.10 m'},{k:'Poids',v:'14 T'},
+      {k:'Réservoir',v:'1 000 L'},{k:'Pompe',v:'1 000 L/min'}
+    ],
+    cellules: [
+      {id:'tdb',titre:'Tableau de bord',couleur:'c-orange',ax:27,ay:33,
+       top:'2%',left:'0.5%',
+       items:[
+         {n:'Télépéage',q:1},{n:'Coupe-ceinture',q:1},{n:'Détecteur CO',q:1},
+         {n:'2 Clés triangle',q:2},{n:'Clé gaz multifonction',q:1},
+         {n:'Télémètre laser',q:1},{n:'2 GHV',q:2},{n:'DFD',q:1}
+       ]},
+      {id:'cab',titre:'Cabine arrière',couleur:'c-rouge',ax:37,ay:37,
+       top:'2%',left:'17%',
+       items:[
+         {n:'3 Masques ARI',q:3},{n:'Extincteur CO₂',q:1},{n:'1 ARI complet',q:1},
+         {n:'2 Manchons Ø70/45',q:2},{n:'4 Liaisons pers.',q:4},{n:'Ligne guide',q:1},{n:'Rubalise',q:1}
+       ]},
+      {id:'toit',titre:'Toit',couleur:'c-gris',ax:51,ay:12,
+       top:'1%',left:'39%',
+       items:[
+         {n:'Échelle 2 plans PM'},{n:'Échelle à coulisse 2P'},{n:'Échelle à crochet'},
+         {n:'2 Clés barrage',q:2},{n:'Balai cantonnier',q:1},{n:'Wibou',q:1},
+         {n:'Pelle / Fourche'},{n:'Lot oxygénothérapie',q:1}
+       ]},
+      {id:'cgh',titre:'Coffre gauche haut',couleur:'c-bleu',ax:23,ay:50,
+       top:'30%',left:'0.5%',
+       items:[
+         {n:'Scie égoïne'},{n:'Valise électro-secours'},{n:'Caisse à outils'},
+         {n:'Bidon absorbant'},{n:'2 OFT',q:2},{n:'2 FGI mousse',q:2},
+         {n:'Collecteur alimentation'},{n:'Manchons Ø70/45',q:2}
+       ]},
+      {id:'cgb',titre:'Coffre gauche bas',couleur:'c-bleu',ax:23,ay:68,
+       top:'auto',left:'0.5%',bottom:'13%',
+       items:[
+         {n:'Tuyau Ø70 + div.65/2×45'},{n:'6 Bouteilles ARI',q:6},
+         {n:'Division 100/2×65'},{n:'Lance queue de paon'},
+         {n:'LDV 500 + LDV 1000'},{n:'2 Obturateurs',q:2},
+         {n:'Ventilateur',q:1},{n:'Clé poteau + Clé St-Ét.'}
+       ]},
+      {id:'siege',titre:'Sous les sièges',couleur:'c-jaune',ax:38,ay:80,
+       top:'auto',left:'17%',bottom:'1%',
+       items:[
+         {n:'4 Ceinturons',q:4},{n:'3 Sangles maintien',q:3},
+         {n:'4 ARI complets',q:4},{n:'Valise ouvre-porte'},{n:'Lot signalisation'}
+       ]},
+      {id:'cdh',titre:'Coffre droit haut',couleur:'c-vert',ax:78,ay:38,
+       top:'3%',right:'0.5%',
+       items:[
+         {n:'Coupe-boulon'},{n:'Hache'},{n:'Masse'},{n:'Halligan Bar'},
+         {n:'2 Enrouleurs',q:2},{n:'Jerricane'},{n:'2 Projecteurs',q:2}
+       ]},
+      {id:'cdm',titre:'Coffre droit milieu',couleur:'c-vert',ax:79,ay:56,
+       top:'37%',right:'0.5%',
+       items:[
+         {n:'4 Cônes de lubeck',q:4},{n:'2 Tuyaux Ø45',q:2},
+         {n:'LDV 500'},{n:'2 Aspiraux',q:2},{n:'Seau pompe'}
+       ]},
+      {id:'arr',titre:'Coffre arrière',couleur:'c-rouge',ax:65,ay:78,
+       top:'auto',right:'17%',bottom:'1%',
+       items:[
+         {n:'2 Dévidoirs',q:2},{n:'Division 65/65-2×45'},{n:'Serpette'},
+         {n:'Kit de lavage'},{n:'Tuyaux Ø45'}
+       ]},
+      {id:'cdb',titre:'Coffre droit bas',couleur:'c-vert',ax:79,ay:73,
+       top:'auto',right:'0.5%',bottom:'12%',
+       items:[
+         {n:'Échelle coulisse GR'},{n:'Manche cabine'},
+         {n:'Coude Ø45'},{n:'Flotteur / Crépine'},{n:'Lot oxygénothérapie'}
+       ]}
+    ]
+  },
+  {
+    nom: 'BEA — CIS SÉVERINE',
+    gabarit: [
+      {k:'Long.',v:'6.03 m'},{k:'Larg.',v:'2.00 m'},
+      {k:'Haut.',v:'2.60 m'},{k:'Poids',v:'4.5 T'},
+      {k:'Haut. travail',v:'18 m'}
+    ],
+    cellules: [
+      {id:'tdb',titre:'Tableau de bord',couleur:'c-orange',ax:27,ay:30,
+       top:'2%',left:'0.5%',
+       items:[
+         {n:'Télépéage'},{n:'Kit urgence vital'},{n:'Pochette carburant'},
+         {n:'Détecteur CO'},{n:'2 Télécommandes',q:2},{n:'Fiche schéma BEA'},
+         {n:'2 Talkies-walkies',q:2},{n:'Télémètre laser'},
+         {n:'2 Clés triangles',q:2},{n:'Pince / Cale de porte'}
+       ]},
+      {id:'siege',titre:'Derrière les sièges',couleur:'c-rouge',ax:35,ay:36,
+       top:'2%',left:'18%',
+       items:[
+         {n:'Commande'},{n:'Extincteur poudre 2kg'},{n:'2 Projecteurs',q:2},
+         {n:'Boîte de lingettes'},{n:'OFD'},{n:'Cric + sac clés'},
+         {n:'3 GHV',q:3},{n:'2 Ceinturons',q:2}
+       ]},
+      {id:'nacelle',titre:'Nacelle',couleur:'c-gris',ax:52,ay:16,
+       top:'1%',left:'38%',
+       items:[
+         {n:'2 Longes de maintien',q:2},{n:'Porte-brancard'},{n:'3 Sangles',q:3}
+       ]},
+      {id:'cad',titre:'Coffret avant droit',couleur:'c-vert',ax:80,ay:34,
+       top:'3%',right:'0.5%',
+       items:[{n:'2 Plaques calages métal.',q:2}]},
+      {id:'cavg',titre:'Coffre avant gauche',couleur:'c-bleu',ax:25,ay:50,
+       top:'28%',left:'0.5%',
+       items:[
+         {n:'Lot échelle'},{n:'2 Harnais anti-chute',q:2},{n:'Chaînes à neige'}
+       ]},
+      {id:'cag',titre:'Coffret avant gauche',couleur:'c-vert',ax:20,ay:47,
+       top:'44%',left:'0.5%',
+       items:[{n:'2 Plaques calages métal.',q:2}]},
+      {id:'cmg',titre:'Coffre milieu gauche',couleur:'c-rouge',ax:27,ay:65,
+       top:'auto',left:'0.5%',bottom:'14%',
+       items:[{n:'2 ARI complets',q:2},{n:'2 Masques ARI',q:2}]},
+      {id:'cd',titre:'Coffre droit',couleur:'c-vert',ax:80,ay:55,
+       top:'29%',right:'0.5%',
+       items:[
+         {n:'2 Tuyaux Ø45',q:2},{n:'4 Cônes de lubeck',q:4},{n:'4 Tiges verrouillage',q:4}
+       ]},
+      {id:'carr',titre:'Coffre arrière',couleur:'c-orange',ax:76,ay:72,
+       top:'auto',right:'0.5%',bottom:'13%',
+       items:[
+         {n:'Manchon Ø45'},{n:'Clé de poteau'},{n:'Vanne pied échelle Ø45'},
+         {n:'Coude Ø45'},{n:'Plaque protection nacelle'},
+         {n:'LDV 500'},{n:'Lance canon'},{n:'Cagoule évacuation'},
+         {n:'Raccord réduction Ø70/40'}
+       ]},
+      {id:'lag',titre:'Loges arrière gauche',couleur:'c-bleu',ax:66,ay:80,
+       top:'auto',right:'17%',bottom:'1%',
+       items:[{n:'4 Plaques calage bois',q:4},{n:'Cale de roue'}]}
+    ]
+  }
+]
+
+/* ══════════════════════════════════
+   ÉTAT
+══════════════════════════════════ */
+const STORAGE_KEY = 'sdis42_checks';
+let currentPageIdx = 0;
+let checks = loadChecks();
+
+function loadChecks() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function saveChecks() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(checks)); }
+  catch(e) {}
+}
+
+/* Couleurs hex */
+const COLORS = {
+  'c-rouge':'#CC2020','c-orange':'#D97820','c-vert':'#2A7B35',
+  'c-bleu':'#1458A8','c-jaune':'#E8A000','c-gris':'#3C3C3C'
+};
+
+/* ══════════════════════════════════
+   CONSTRUCTION DE L'INTERFACE
+══════════════════════════════════ */
+function init() {
+  buildTabs();
+  renderPage(currentPageIdx);
+}
+
+function buildTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  defaultPages.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (i === 0 ? ' active' : '');
+    btn.textContent = p.nom;
+    btn.onclick = () => switchTab(i);
+    tabs.appendChild(btn);
+  });
+}
+
+function switchTab(idx) {
+  currentPageIdx = idx;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i === idx));
+  renderPage(idx);
+}
+
+function renderPage(idx) {
+  const page = defaultPages[idx];
+  const pid  = 'p' + idx;
+  if (!checks[pid]) checks[pid] = {};
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+
+  if (!page.cellules || page.cellules.length === 0) {
+    content.innerHTML = '<div class="empty-state"><div class="es-icon">📦</div><p>Aucun article dans cet inventaire.</p></div>';
+    updateProgress(idx);
+    return;
+  }
+
+  page.cellules.forEach((cel, ci) => {
+    if (!cel.items || cel.items.length === 0) return;
+    const card = document.createElement('div');
+    const allChecked = cel.items.every((_, ii) => checks[pid][cel.id+'_'+ii]);
+    card.className = 'section-card' + (allChecked ? ' done' : '');
+    card.dataset.ci = ci;
+
+    const color = COLORS[cel.couleur] || '#CC2020';
+    const doneCount = cel.items.filter((_, ii) => checks[pid][cel.id+'_'+ii]).length;
+
+    card.innerHTML = `
+      <div class="section-header" style="background:${color}" onclick="toggleSection(this)">
+        <div class="section-left">
+          <div class="section-icon"></div>
+          <div class="section-title">${cel.titre}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="section-pill ${allChecked?'done':''}">${doneCount}/${cel.items.length}</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="items"></div>`;
+
+    const itemsDiv = card.querySelector('.items');
+    cel.items.forEach((item, ii) => {
+      const key = cel.id + '_' + ii;
+      const isChk = !!checks[pid][key];
+      const row = document.createElement('div');
+      row.className = 'item' + (isChk ? ' checked' : '');
+      row.innerHTML = `
+        <div class="check-box">${isChk ? '✓' : ''}</div>
+        <div class="item-name">${item.n}</div>
+        ${item.q ? `<div class="item-qty">×${item.q}</div>` : ''}`;
+      row.onclick = () => toggleItem(idx, cel, ii);
+      itemsDiv.appendChild(row);
+    });
+
+    content.appendChild(card);
+  });
+
+  updateProgress(idx);
+}
+
+function toggleSection(header) {
+  header.closest('.section-card').classList.toggle('collapsed');
+}
+
+function toggleItem(pageIdx, cel, itemIdx) {
+  const pid = 'p' + pageIdx;
+  const key = cel.id + '_' + itemIdx;
+  checks[pid][key] = !checks[pid][key];
+  saveChecks();
+  renderPage(pageIdx);
+}
+
+function updateProgress(idx) {
+  const page = defaultPages[idx];
+  const pid  = 'p' + idx;
+  let total = 0, done = 0;
+  (page.cellules || []).forEach(cel => {
+    (cel.items || []).forEach((_, ii) => {
+      total++;
+      if (checks[pid] && checks[pid][cel.id+'_'+ii]) done++;
+    });
+  });
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = `${done} / ${total} articles`;
+  document.getElementById('prog-pct').textContent  = pct + '%';
+}
+
+/* ══════════════════════════════════
+   RESET
+══════════════════════════════════ */
+function resetCurrent() {
+  if (!confirm('Réinitialiser tous les articles de cet engin ?')) return;
+  checks['p' + currentPageIdx] = {};
+  saveChecks();
+  renderPage(currentPageIdx);
+}
+
+/* ══════════════════════════════════
+   VALIDATION
+══════════════════════════════════ */
+function validate() {
+  const page = defaultPages[currentPageIdx];
+  const pid  = 'p' + currentPageIdx;
+  let total = 0, done = 0;
+  const missing = [];
+
+  (page.cellules || []).forEach(cel => {
+    (cel.items || []).forEach((item, ii) => {
+      total++;
+      if (checks[pid] && checks[pid][cel.id+'_'+ii]) { done++; }
+      else { missing.push({ section: cel.titre, name: item.n, qty: item.q }); }
+    });
+  });
+
+  const now = new Date();
+  const time = now.toLocaleString('fr-FR', { weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
+
+  document.getElementById('r-icon').textContent    = missing.length === 0 ? '✅' : '⚠️';
+  document.getElementById('r-title').textContent   = missing.length === 0 ? 'Inventaire complet !' : `${missing.length} manquant(s)`;
+  document.getElementById('r-title').className     = 'result-title ' + (missing.length === 0 ? 'ok' : 'ko');
+  document.getElementById('r-sub').textContent     = `${done}/${total} articles vérifiés — ${page.nom}`;
+  document.getElementById('r-time').textContent    = time;
+
+  const missList = document.getElementById('r-missing');
+  if (missing.length > 0) {
+    // Grouper par section
+    const bySec = {};
+    missing.forEach(m => { if (!bySec[m.section]) bySec[m.section]=[]; bySec[m.section].push(m); });
+    missList.innerHTML = Object.entries(bySec).map(([sec, items]) =>
+      `<div class="miss-section">${sec}</div>` +
+      items.map(i => `<div class="miss-item">• ${i.name}${i.qty?' ×'+i.qty:''}</div>`).join('')
+    ).join('');
+    missList.style.display = 'block';
+  } else {
+    missList.style.display = 'none';
+  }
+
+  document.getElementById('result-modal').classList.add('open');
+}
+
+function closeResult(e) {
+  if (!e || e.target === document.getElementById('result-modal') || e.currentTarget === document.querySelector('.btn-close-result')) {
+    document.getElementById('result-modal').classList.remove('open');
+  }
+}
+
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
+init();
+
+// Ouvre le bon engin si URL contient un hash (depuis QR code de l'affiche)
+const _hash = decodeURIComponent(window.location.hash.replace('#',''));
+if (_hash) {
+  const idx = defaultPages.findIndex(p => p.nom === _hash);
+  if (idx >= 0) switchTab(idx);
+}
+</script>
+</body>
+</html>
